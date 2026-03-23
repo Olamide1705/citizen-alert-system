@@ -43,7 +43,7 @@ export default function NavBar() {
           href="/register"
           className="px-6 py-2 bg-primary hover:bg-[#b7281b] hover:scale-105 transition duration-200 text-white rounded-xl font-semibold text-[18px]"
         >
-          Sign up
+          Get Started
         </Link>
       </div>
 
@@ -119,7 +119,7 @@ export default function NavBar() {
               onClick={() => setSidebarOpen(false)}
               className="px-6 py-3 text-white bg-primary font-semibold text-base rounded-xl"
             >
-              Sign up
+              Get Started
             </Link>
           </div>
         </aside>

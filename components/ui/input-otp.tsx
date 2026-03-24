@@ -45,7 +45,7 @@ function InputOTPSlot({
 }) {
   const inputOTPContext = React.useContext(OTPInputContext);
   const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {};
-
+  const isFilled = char && char !== "";
   return (
     <div
       data-slot="input-otp-slot"
@@ -53,6 +53,7 @@ function InputOTPSlot({
       className={cn(
         "rounded-md w-12 lg:w-20 h-12 lg:h-18 py-1 text-3xl lg:text-4xl font-bold text-center relative flex items-center justify-center border transition-all outline-none shadow-xs",
         "bg-[#1A1F2E] text-white",
+        isFilled ? "bg-[#111620] text-white" : "bg-[#1A1F2E] text-white",
       )}
       {...props}
     >

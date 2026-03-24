@@ -21,7 +21,7 @@ import { Phone } from "lucide-react";
 const signupSchema = z.object({
   phone: z
     .string()
-    .regex(/^\d{10}$/, { message: "Enter 10 digits without the leading 0" }),
+    .regex(/^\d{11}$/, { message: "Your phone number must be 11 digits" }),
 });
 
 type SignupSchema = z.infer<typeof signupSchema>;
@@ -62,7 +62,7 @@ export default function SignupPage() {
             Create your Account
           </h1>
 
-          <Card className="border border-white/10 bg-[#111620] shadow-none">
+          <Card className="border border-white/20 bg-[#111620] shadow-none">
             <CardContent className="px-6">
               <div className="mb-8 space-y-2">
                 <h2 className="text-xl lg:text-3xl font-semibold text-white">
@@ -91,7 +91,7 @@ export default function SignupPage() {
                             <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                             <Input
                               placeholder="0812 345 6789"
-                              className="h-12 border-white/20 pl-10 text-white"
+                              className="h-12 pl-10 text-white bg-black text-sm"
                               {...field}
                             />
                           </div>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import QueryProvider from "./providers/query-provider";
+import { Toaster } from "sonner";
 
 const satoshi = localFont({
   src: "./Satoshi-Variable.woff2",
@@ -19,7 +21,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={satoshi.className}>{children}</body>
+      <body className={satoshi.className}>
+        <QueryProvider>
+          {children}
+          <Toaster richColors />
+        </QueryProvider>
+      </body>
     </html>
   );
 }

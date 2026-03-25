@@ -19,14 +19,21 @@ import {
 } from "@/components/ui/input-otp";
 import z from "zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSendOtp, useVerifyOtp } from "@/queries/auth";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const FormSchema = z.object({
   otp: z.string().min(6, {
-    message: "Your one-time password must be 6 characters.",
+    message: "OTP must be 6 digits",
   }),
 });
 
-export default function VerifyRegistrationOTP() {
+export default function OTPVerificationPage() {
+  const router = useRouter();
+  const { mutate: verifyOtp, isPending: isVerifying } = useVerifyOtp();
+  const { mutate: resendOtp, isPending: isResending } = useSendOtp();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -34,7 +41,7 @@ export default function VerifyRegistrationOTP() {
     },
   });
 
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(60);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -50,14 +57,34 @@ export default function VerifyRegistrationOTP() {
   const seconds = String(timeLeft % 60).padStart(2, "0");
 
   const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log("OTP Submitted:", values);
-    // TODO: Call your backend API to verify OTP here
+    const sessionData = sessionStorage.getItem("signup-verification");
+    if (!sessionData) return;
+
+    const { phone, tokenId } = JSON.parse(sessionData);
+    verifyOtp(
+      { otp: values.otp, tokenId },
+      {
+        onSuccess: (res) => {
+          if (res.code === "00" && res.transactionStatus === "Y") {
+            router.push("/onboarding");
+          } else {
+            toast("Invalid OTP. Please try again.");
+          }
+        },
+      },
+    );
   };
 
   const handleResend = () => {
-    setTimeLeft(30);
-    console.log("Resend OTP triggered");
-    // TODO: Call your backend API to resend OTP
+    if (isResending) return;
+    const sessionData = sessionStorage.getItem("signup-verification");
+    if (!sessionData) return;
+
+    const { phone, tokenId } = JSON.parse(sessionData);
+    resendOtp(
+      { mobileNo: phone, email: `${phone}@safesignal.ng`, tokenId },
+      { onSuccess: () => setTimeLeft(60) },
+    );
   };
 
   return (
@@ -123,22 +150,30 @@ export default function VerifyRegistrationOTP() {
                 <button
                   type="button"
                   onClick={handleResend}
-                  disabled={timeLeft > 0}
+                  disabled={timeLeft > 0 || isResending}
                   className={`text-primary hover:underline cursor-pointer ${
-                    timeLeft > 0 ? "opacity-50 cursor-not-allowed" : ""
+                    timeLeft > 0 || isResending
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
                   }`}
                 >
-                  Resend Code
+                  {isResending ? "Resending..." : "Resend Code"}
                 </button>
               </p>
 
               <Button
                 type="submit"
                 className="h-12 w-full bg-primary text-white hover:bg-[#b7281b]"
-                disabled={timeLeft === 0}
+                disabled={isVerifying || timeLeft === 0}
               >
-                {" "}
-                Verify
+                {isVerifying ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    <span>Verifying...</span>
+                  </>
+                ) : (
+                  "Verify"
+                )}
               </Button>
             </form>
           </Form>

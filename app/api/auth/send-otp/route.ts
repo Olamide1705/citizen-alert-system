@@ -5,6 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { tokenId, email, mobileNo } = body;
+    console.log({ tokenId, email, mobileNo });
 
     if (!tokenId || !email || !mobileNo) {
       return NextResponse.json(
@@ -13,10 +14,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await sendOtp({ tokenId, mobileNo });
+    const result = await sendOtp({ tokenId, email, mobileNo });
 
     return NextResponse.json(result);
   } catch (error: unknown) {
+    console.error("SEND OTP ROUTE ERROR:", error);
+
     const message =
       error instanceof Error ? error.message : "Failed to send OTP";
 

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { postSendOtp, postVerifyOtp } from "@/services/auth";
 import type { SendOtpInput, VerifyOtpInput } from "@/types/auth";

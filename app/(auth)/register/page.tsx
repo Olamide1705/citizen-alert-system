@@ -16,17 +16,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Phone } from "lucide-react";
+import { Loader2, Phone } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useSendOtp } from "@/queries/auth";
 
 const signupSchema = z.object({
   phone: z
     .string()
-    .regex(/^\d{11}$/, { message: "Your phone number must be 11 digits" }),
+    .regex(/^\d{11}$/, { message: "Enter a valid 11-digit phone number" }),
 });
 
 type SignupSchema = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
+  const router = useRouter();
+
+  const { mutate, isPending } = useSendOtp();
+
   const form = useForm<SignupSchema>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -35,7 +41,28 @@ export default function SignupPage() {
   });
 
   const onSubmit = async (values: SignupSchema) => {
-    console.log(values);
+    const tokenId = crypto.randomUUID();
+
+    mutate(
+      {
+        tokenId,
+        mobileNo: values.phone,
+        email: `${values.phone}@safesignal.ng`,
+      },
+      {
+        onSuccess: () => {
+          sessionStorage.setItem(
+            "signup-verification",
+            JSON.stringify({
+              phone: values.phone,
+              tokenId,
+            }),
+          );
+
+          router.push("/otp-verification");
+        },
+      },
+    );
   };
 
   return (
@@ -69,7 +96,8 @@ export default function SignupPage() {
                   Sign up with phone number
                 </h2>
                 <p className="text-sm lg:text-base text-white/60">
-                  We&apos;ll send you a verification code to continue.
+                  We&apos;ll send you a verification code to confirm your phone
+                  number.
                 </p>
               </div>
 
@@ -91,7 +119,7 @@ export default function SignupPage() {
                             <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                             <Input
                               placeholder="0812 345 6789"
-                              className="h-12 pl-10 text-white bg-black text-sm"
+                              className="h-12 border-white/10 bg-black pl-12 text-white placeholder:text-white/35 focus-visible:ring-1 focus-visible:ring-primary"
                               {...field}
                             />
                           </div>
@@ -104,8 +132,16 @@ export default function SignupPage() {
                   <Button
                     type="submit"
                     className="h-12 w-full bg-primary text-white hover:bg-[#b7281b]"
+                    disabled={isPending}
                   >
-                    Continue
+                    {isPending ? (
+                      <>
+                        <Loader2 className="animate-spin" />
+                        <span>Continue...</span>
+                      </>
+                    ) : (
+                      "Continue"
+                    )}
                   </Button>
                 </form>
               </Form>

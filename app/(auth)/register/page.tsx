@@ -16,53 +16,38 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, Phone } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSendOtp } from "@/queries/auth";
+import { useSignup } from "@/queries/auth";
+import { useState } from "react";
 
 const signupSchema = z.object({
-  phone: z
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z
     .string()
-    .regex(/^\d{11}$/, { message: "Enter a valid 11-digit phone number" }),
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
-
 type SignupSchema = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const router = useRouter();
-
-  const { mutate, isPending } = useSendOtp();
+  const { mutate, isPending } = useSignup();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<SignupSchema>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      phone: "",
+      email: "",
+      password: "",
     },
   });
 
-  const onSubmit = async (values: SignupSchema) => {
-    const tokenId = crypto.randomUUID();
-
-    mutate(
-      {
-        tokenId,
-        mobileNo: values.phone,
-        email: `${values.phone}@safesignal.ng`,
+  const onSubmit = (values: SignupSchema) => {
+    mutate(values, {
+      onSuccess: () => {
+        router.push("/onboarding");
       },
-      {
-        onSuccess: () => {
-          sessionStorage.setItem(
-            "signup-verification",
-            JSON.stringify({
-              phone: values.phone,
-              tokenId,
-            }),
-          );
-
-          router.push("/otp-verification");
-        },
-      },
-    );
+    });
   };
 
   return (
@@ -93,11 +78,10 @@ export default function SignupPage() {
             <CardContent className="px-6">
               <div className="mb-8 space-y-2">
                 <h2 className="text-xl lg:text-3xl font-semibold text-white">
-                  Sign up with phone number
+                  Sign up with Email
                 </h2>
                 <p className="text-sm lg:text-base text-white/60">
-                  We&apos;ll send you a verification code to confirm your phone
-                  number.
+                  Create your account using your email and password.
                 </p>
               </div>
 
@@ -106,22 +90,52 @@ export default function SignupPage() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-5"
                 >
+                  {/* Email */}
                   <FormField
                     control={form.control}
-                    name="phone"
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white/80">Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="example@gmail.com"
+                            className="h-12 border border-white/10 bg-black text-white"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Password */}
+                  <FormField
+                    control={form.control}
+                    name="password"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-white/80">
-                          Phone Number
+                          Password
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                             <Input
-                              placeholder="0812 345 6789"
-                              className="h-12 border-white/10 bg-black pl-12 text-white placeholder:text-white/35 focus-visible:ring-1 focus-visible:ring-primary"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Enter your password"
+                              className="h-12 border border-white/10 bg-black text-white pr-10"
                               {...field}
                             />
+                            <div
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400"
+                            >
+                              {showPassword ? (
+                                <EyeOff size={20} />
+                              ) : (
+                                <Eye size={20} />
+                              )}
+                            </div>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -137,7 +151,7 @@ export default function SignupPage() {
                     {isPending ? (
                       <>
                         <Loader2 className="animate-spin" />
-                        <span>Continue...</span>
+                        <span>Creating acount...</span>
                       </>
                     ) : (
                       "Continue"

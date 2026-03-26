@@ -105,7 +105,7 @@ export default function BasicInfoStep({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-12 w-full border-white/10 bg-black text-white focus:ring-1 focus:ring-primary">
+                          <SelectTrigger className="w-full border-white/10 bg-black text-white focus:ring-1 focus:ring-primary">
                             <SelectValue placeholder="Select language" />
                           </SelectTrigger>
                         </FormControl>

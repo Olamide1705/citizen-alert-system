@@ -1,33 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useMutation } from "@tanstack/react-query";
+import { signupWithEmail } from "@/services/auth";
 
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { postSendOtp, postVerifyOtp } from "@/services/auth";
-import type { SendOtpInput, VerifyOtpInput } from "@/types/auth";
-
-export function useSendOtp(
-  options?: UseMutationOptions<any, any, SendOtpInput, unknown>,
-) {
+export function useSignup() {
   return useMutation({
-    mutationFn: (data: SendOtpInput) => postSendOtp(data),
-    meta: {
-      successMessage: "OTP sent successfully",
-      additionalDescription: "Check your phone for the code.",
-      errorMessage: "Error sending OTP",
-    },
-    ...options,
-  });
-}
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      signupWithEmail(email, password),
 
-export function useVerifyOtp(
-  options?: UseMutationOptions<any, any, VerifyOtpInput, unknown>,
-) {
-  return useMutation({
-    mutationFn: (data: VerifyOtpInput) => postVerifyOtp(data),
     meta: {
-      successMessage: "OTP verified successfully",
-      additionalDescription: "Your number has been confirmed.",
-      errorMessage: "Error verifying OTP",
+      successMessage: "Account created successfully",
+      additionalDescription: "Redirecting...",
+      errorMessage: "Signup Failed",
     },
-    ...options,
   });
 }

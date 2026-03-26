@@ -179,3 +179,6 @@
 //     </main>
 //   );
 // }
+export default function OTPVerificationPage() {
+  return <div>OTP Page</div>;
+}

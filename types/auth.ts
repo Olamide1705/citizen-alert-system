@@ -7,6 +7,7 @@ export interface InterswitchAccessTokenResponse {
 
 export interface SendOtpInput {
   tokenId: string;
+  email: string;
   mobileNo: string;
 }
 

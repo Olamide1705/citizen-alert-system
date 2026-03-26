@@ -1,24 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+
 import BasicInfoStep from "@/components/onboarding/basic-info-step";
 import EmergencyContactsStep from "@/components/onboarding/emergency-contact-step";
 import PermissionsStep from "@/components/onboarding/permissions-step";
-import Link from "next/link";
-import Image from "next/image";
+
+type Contact = {
+  id: number;
+  name: string;
+  phone: string;
+};
 
 type OnboardingData = {
   fullName?: string;
   preferredLanguage?: string;
-  contactName?: string;
-  contactPhone?: string;
+  trustedContacts?: Contact[];
   locationAccess?: boolean;
   microphoneAccess?: boolean;
 };
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<OnboardingData>({});
+  const [data, setData] = useState<OnboardingData>({
+    trustedContacts: [],
+  });
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
@@ -43,7 +51,10 @@ export default function OnboardingPage() {
       <div className="mx-auto max-w-2xl">
         {step === 1 && (
           <BasicInfoStep
-            defaultValues={data}
+            defaultValues={{
+              fullName: data.fullName,
+              preferredLanguage: data.preferredLanguage,
+            }}
             onNext={(values) => {
               setData((prev) => ({ ...prev, ...values }));
               nextStep();
@@ -53,10 +64,10 @@ export default function OnboardingPage() {
 
         {step === 2 && (
           <EmergencyContactsStep
-            defaultValues={data}
+            defaultValues={data.trustedContacts}
             onBack={prevStep}
-            onNext={(values) => {
-              setData((prev) => ({ ...prev, ...values }));
+            onNext={(contacts) => {
+              setData((prev) => ({ ...prev, trustedContacts: contacts }));
               nextStep();
             }}
           />
@@ -64,7 +75,10 @@ export default function OnboardingPage() {
 
         {step === 3 && (
           <PermissionsStep
-            defaultValues={data}
+            defaultValues={{
+              locationAccess: data.locationAccess,
+              microphoneAccess: data.microphoneAccess,
+            }}
             onBack={prevStep}
             onFinish={(values) => {
               const finalData = { ...data, ...values };
